@@ -10,13 +10,14 @@ import gmsh
 import meshio
 import argparse
 
+#set up arguments and options here.
 argparser = argparse.ArgumentParser("A python program to convert gmsh files into vtu files for paraview.")
 argparser.add_argument("fromfile")
 argparser.add_argument("tofile")
 args = argparser.parse_args()
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
-# Specify input and output directories here:
+# Specify input and output files here:
 print("Setting directories...")
 InputFile = args.fromfile
 OutputFile = args.tofile
