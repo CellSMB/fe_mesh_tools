@@ -104,7 +104,7 @@ def nodes_and_elements(file_name, type_num):
     e_file.write(e_list[0] + "\n")
 
     # Set Element Types
-    types = {type_num: types[type_num].strip()}
+    e_types = {type_num: types[type_num].strip()}
 
     # Loop through nodes and blocks
     count = 1
@@ -114,8 +114,8 @@ def nodes_and_elements(file_name, type_num):
             continue
         for j in range(int(block.split(" ")[3])):
             count +=1
-            if int(block.split(" ")[2]) in types.keys():
-                e_file.write(types[int(block.split(" ")[2])] + "\t")
+            if int(block.split(" ")[2]) in e_types.keys():
+                e_file.write(e_types[int(block.split(" ")[2])] + "\t")
                 e_file.write(block.split(" ")[1] + "\t")
                 for value in e_list[i+j+1].split():
                     e_file.write(value + "\t")
@@ -124,9 +124,10 @@ def nodes_and_elements(file_name, type_num):
                 continue
 
 def cvt2Numpy(test_name, elem_type):
+    save_name = test_name.split('gmsh_')[1].split('.msh')[0]
     # Inputing Files
-    e_file = open(test_name + '_cvtMSH.ele', 'r')
-    n_file = open(test_name + '_cvtMSH.nodes', 'r')
+    e_file = open(save_name + '_cvtMSH.ele', 'r')
+    n_file = open(save_name + '_cvtMSH.nodes', 'r')
 
     e_file_list = e_file.readlines()
     n_file_list = n_file.readlines()
@@ -202,13 +203,11 @@ def main():
     try:
         nodes_and_elements(InputFile, ElemType)
         _, _, _, n_xyz, ele_map, _ = cvt2Numpy(InputFile, types[ElemType])
+        np.save(OutputFile + ".ele", ele_map)
+        np.save(OutputFile + ".nodes", n_xyz)
+        print("Files added to directory.")
     except:
         print("Please ensure InputFile name is of type gmsh_TESTNAME.msh")
    
-    np.save(OutputFile + ".ele", ele_map)
-    np.save(OutputFile + ".nodes", n_xyz)
-
-    print("Files added to directory.")
-
 if __name__ == '__main__':
     main()
