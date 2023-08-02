@@ -19,6 +19,7 @@ Output: n_n: number of nodes
 """
 
 import numpy as np
+import argparse
 
 dim = 3
 
@@ -30,7 +31,7 @@ types = {
     12: "27-node-second-order-hexahedron"
 }
 
-def nodes_and_elements(file_path, file_name, type_num):
+def nodes_and_elements(file_name, type_num):
     
     # Setup
     msh_file = open(file_name, 'r')
@@ -71,7 +72,7 @@ def nodes_and_elements(file_path, file_name, type_num):
     # $$$$ Nodes $$$$ #
 
     # Create a file to write to: gmsh2iron.node
-    save_name = file_path + file_name.split('gmsh_')[1].split('.msh')[0]
+    save_name = file_name.split('gmsh_')[1].split('.msh')[0]
     n_file = open(save_name + '_cvtMSH.nodes', 'w')
     n_file.write(n_list[0] + "\n")
 
@@ -122,10 +123,10 @@ def nodes_and_elements(file_path, file_name, type_num):
             else:
                 continue
 
-def cvt2Numpy(file_path, test_name, elem_type):
+def cvt2Numpy(test_name, elem_type):
     # Inputing Files
-    e_file = open(file_path + test_name + '_cvtMSH.ele', 'r')
-    n_file = open(file_path + test_name + '_cvtMSH.nodes', 'r')
+    e_file = open(test_name + '_cvtMSH.ele', 'r')
+    n_file = open(test_name + '_cvtMSH.nodes', 'r')
 
     e_file_list = e_file.readlines()
     n_file_list = n_file.readlines()
@@ -186,13 +187,28 @@ def cvt2Numpy(file_path, test_name, elem_type):
     return n_n, n_el, n_id, n_xyz, ele_map, ele_idx
 
 def main():
-    test_name = 'oneTetTest'
-    file_path = "/Users/murrayla/Documents/main_PhD/Project_Dino/"
-    type_num = 11
+    #set up arguments and options here.
+    argparser = argparse.ArgumentParser("A python program to convert gmsh files into numpy arrays for Iron.")
+    argparser.add_argument("fromfile")
+    argparser.add_argument("elemtype", type=int)
+    argparser.add_argument("tofile")
+    args = argparser.parse_args()
+
+    InputFile = args.fromfile
+    ElemType = args.elemtype
+    OutputFile = args.tofile
+
     # Usage example
-    nodes_and_elements(file_path, "gmsh_" + test_name + ".msh", type_num)
-    n_n, n_el, n_id, n_xyz, ele_map, ele_idx = cvt2Numpy(file_path, test_name, types[11])
-    print(n_n, n_el, n_id, n_xyz, ele_map, ele_idx)
+    try:
+        nodes_and_elements(InputFile, ElemType)
+        _, _, _, n_xyz, ele_map, _ = cvt2Numpy(InputFile, types[ElemType])
+    except:
+        print("Please ensure InputFile name is of type gmsh_TESTNAME.msh")
+   
+    np.save(OutputFile + ".ele", ele_map)
+    np.save(OutputFile + ".nodes", n_xyz)
+
+    print("Files added to directory.")
 
 if __name__ == '__main__':
     main()
